@@ -1,0 +1,241 @@
+syntax = "proto3";
+
+package vcontainermodels;
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+message ProcessSpec{
+    string ID = 1;//  `json:"id,omitempty"`
+
+	// Path to command to execute.
+	string Path = 2;// `json:"path,omitempty"`
+
+	// Arguments to pass to command.
+	repeated string Args = 3; //`json:"args,omitempty"`
+
+	// Environment variables.
+	repeated string Env = 4; // `json:"env,omitempty"`
+
+	// Working directory (default: home directory).
+	string Dir = 5; // `json:"dir,omitempty"`
+
+	// The name of a user in the container to run the process as.
+	// This must either be a username, or uid:gid.
+	string User = 6; // `json:"user,omitempty"`
+
+	// Resource limits
+    ResourceLimits Limits = 7 [(gogoproto.nullable) = false];//`json:"rlimits,omitempty"`
+    
+    ProcessLimits OverrideContainerLimits = 8 [(gogoproto.nullable) = false];
+
+	// Execute with a TTY for stdio.
+	TTYSpec TTY =9 [(gogoproto.nullable) = false];// `json:"tty,omitempty"`
+
+	// Execute process in own root filesystem, different from the other processes
+	// in the container.
+    ImageRef Image = 10 [(gogoproto.nullable) = false];// `json:"image,omitempty"`
+    repeated BindMount BindMounts = 11 [(gogoproto.nullable) = false];//
+}
+
+message RunResponse{
+	string ID = 1;
+	string ProcessId = 2;
+}
+
+message TTYSpec{
+    WindowSize WindowSize =1 [(gogoproto.nullable) = false];
+}
+
+message WindowSize  {
+	int32 Columns=1;//  `json:"columns,omitempty"`
+	int32 Rows   =2;//  `json:"rows,omitempty"`
+}
+
+message ResourceLimits{
+    google.protobuf.UInt64Value As = 1;
+}
+
+message BandwidthLimits  {
+	uint64 RateInBytesPerSecond    =1;//   `json:"rate,omitempty"`
+	uint64 BurstRateInBytesPerSecond =2;// `json:"burst,omitempty"`
+}
+
+message ProcessLimits  {
+	CPULimits CPU  = 1  [(gogoproto.nullable) = false] ; //  `json:"cpu_limits,omitempty"`
+	MemoryLimits Memory = 2 [(gogoproto.nullable) = false];//`json:"memory_limits,omitempty"`
+}
+
+message DiskLimits  {
+	uint64 InodeSoft =1;// `json:"inode_soft,omitempty"`
+	uint64 InodeHard =2;// `json:"inode_hard,omitempty"`
+
+	uint64 ByteSoft =3;// `json:"byte_soft,omitempty"`
+	uint64 ByteHard =4;//`json:"byte_hard,omitempty"`
+
+	DiskLimitScope Scope =5;// `json:"scope,omitempty"`
+}
+
+message MemoryLimits{
+    uint64 LimitInBytes =1;// 
+}
+
+message CPULimits{
+    uint64  LimitInShares =1;
+}
+
+message PidLimits  {
+	// Limits the number of pids a container may create before new forks or clones are disallowed to processes in the container.
+	// Note: this may only be enforced when a process attempts to fork, so it does not guarantee that a new container.Run(ProcessSpec)
+	// will not succeed even if the limit has been exceeded, but the process will not be able to spawn further processes or threads.
+	uint64 Max  =1;//`json:"max,omitempty"`
+}
+
+message PortMapping  {
+	uint32 HostPort = 1;  
+	uint32 ContainerPort = 2;
+}
+
+message StreamInSpec{
+	oneof Part{
+		string Path = 1;
+		string User = 2; 
+		bytes Content = 3;
+	}
+}
+
+message StreamInResponse{
+	string Message = 1;
+}
+
+message StreamOutSpec  {
+	string Path = 1;
+	string User = 2;
+}
+
+message StreamOutResponse{
+	bytes Content = 1;
+}
+
+message ContainerInfo {
+    string State = 1;
+    repeated string Events = 2;
+    string HostIP = 3;
+    string ContainerIP = 4;
+    string ExternalIP = 5;
+    string ContainerPath = 6;
+    repeated string ProcessIDs = 7;
+    Properties Properties = 8;
+    repeated PortMapping MappedPorts = 9 [(gogoproto.nullable) = false];
+}
+
+message Metrics {
+	ContainerMemoryStat MemoryStat  =1;
+	ContainerCPUStat CPUStat = 2;
+	ContainerDiskStat DiskStat = 3;
+	ContainerNetworkStat NetworkStat = 4;
+}
+
+message ContainerMemoryStat{
+    uint64 ActiveAnon   =1 [(gogoproto.jsontag) = "active_anon"]; // `json:"active_anon"`
+	uint64 ActiveFile     =2         [(gogoproto.jsontag) ="active_file"]; //`json:"active_file"`
+	uint64 Cache         =3           [(gogoproto.jsontag) ="cache"];
+	uint64 HierarchicalMemoryLimit =4 [(gogoproto.jsontag) ="hierarchical_memory_limit"];
+	uint64 InactiveAnon         =5   [(gogoproto.jsontag) ="inactive_anon"];
+	uint64 InactiveFile        =6   [(gogoproto.jsontag) ="inactive_file"];
+	uint64 MappedFile         =7    [(gogoproto.jsontag) ="mapped_file"];
+	uint64 Pgfault           =8     [(gogoproto.jsontag) ="pgfault"];
+	uint64 Pgmajfault        =9     [(gogoproto.jsontag) ="pgmajfault"];
+	uint64 Pgpgin            =10      [(gogoproto.jsontag) ="pgpgin"];
+	uint64 Pgpgout           =11      [(gogoproto.jsontag) ="pgpgout"];
+	uint64 Rss               =12      [(gogoproto.jsontag) ="rss"];
+	uint64 TotalActiveAnon   =13      [(gogoproto.jsontag) ="total_active_anon"];
+	uint64 TotalActiveFile    =14    [(gogoproto.jsontag) ="total_active_file"];
+	uint64 TotalCache        =15      [(gogoproto.jsontag) ="total_cache"];
+	uint64 TotalInactiveAnon  =16     [(gogoproto.jsontag) ="total_inactive_anon"];
+	uint64 TotalInactiveFile  =17     [(gogoproto.jsontag) ="total_inactive_file"];
+	uint64 TotalMappedFile    =18     [(gogoproto.jsontag) ="total_mapped_file"];
+	uint64 TotalPgfault       =19     [(gogoproto.jsontag) ="total_pgfault"];
+	uint64 TotalPgmajfault    =20     [(gogoproto.jsontag) ="total_pgmajfault"];
+	uint64 TotalPgpgin        =21     [(gogoproto.jsontag) ="total_pgpgin"];
+	uint64 TotalPgpgout      =22      [(gogoproto.jsontag) ="total_pgpgout"];
+	uint64 TotalRss          =23      [(gogoproto.jsontag) ="total_rss"];
+	uint64 TotalUnevictable   =24     [(gogoproto.jsontag) ="total_unevictable"];
+	uint64 Unevictable        =25    [(gogoproto.jsontag) ="unevictable"];
+	uint64 Swap               =26    [(gogoproto.jsontag) ="swap"];
+	uint64 HierarchicalMemswLimit=27  [(gogoproto.jsontag) ="hierarchical_memsw_limit"];
+	uint64 TotalSwap            =28   [(gogoproto.jsontag) ="total_swap"];
+	//   A memory usage total which reports memory usage in the same way that limits are enforced.
+	//   This value includes memory consumed by nested containers.
+	uint64 TotalUsageTowardLimit =29;
+}
+
+message ContainerCPUStat  {
+	uint64 Usage = 1;
+	uint64 User  =2;
+	uint64 System =3;
+}
+
+message ContainerDiskStat  {
+	uint64 TotalBytesUsed    = 1;  
+	uint64 TotalInodesUsed    =2;
+	uint64 ExclusiveBytesUsed  =3;
+	uint64 ExclusiveInodesUsed =4;
+}
+
+message ContainerNetworkStat  {
+	uint64 RxBytes = 1;
+	uint64 TxBytes = 2;
+}
+
+enum DiskLimitScope{
+    DiskLimitScopeTotal = 0;
+    DiskLimitScopeExclusive = 1;
+}
+
+message StopMessage{
+	bool Kill = 1;
+}
+
+message NetInRequest{
+	uint32 HostPort = 1;
+	uint32 ContainerPort = 2;
+}
+
+message NetInResponse{
+	uint32 HostPort = 1;
+	uint32 ContainerPort = 2;
+}
+
+message IPRange{
+	bytes Start = 1 [(gogoproto.jsontag) ="start"];
+	bytes End = 2 [(gogoproto.jsontag) ="end"];
+}
+
+message PortRange{
+	uint32 Start = 1 [(gogoproto.jsontag) ="start"];
+	uint32 End = 2 [(gogoproto.jsontag) ="end"];
+}
+
+message ICMPControl{
+	uint32 Type = 1 [(gogoproto.jsontag) ="type"];
+	uint32 Code = 2 [(gogoproto.jsontag) ="type", (gogoproto.nullable) = true];
+}
+
+message NetOutRuleRequest{
+	// Protocol Protocol `json:"protocol,omitempty"`
+	repeated IPRange Networks = 2 [(gogoproto.jsontag) = "networks",(gogoproto.nullable) = false];
+	// // a list of ranges of IP addresses to whitelist; Start to End inclusive; default all
+	// Networks []IPRange `json:"networks,omitempty"`
+	repeated PortRange Ports = 3 [(gogoproto.jsontag) = "ports",(gogoproto.nullable) = false];
+	// // a list of ranges of ports to whitelist; Start to End inclusive; ignored if Protocol is ICMP; default all
+	// Ports []PortRange `json:"ports,omitempty"`
+	// // specifying which ICMP codes to whitelist; ignored if Protocol is not ICMP; default all
+	// ICMPs *ICMPControl `json:"icmps,omitempty"`
+	ICMPControl ICMPs = 4 [(gogoproto.jsontag) = "icmps", (gogoproto.nullable) = true];
+	// if true, logging is enabled; ignored if Protocol is not TCP or All; default false
+	bool Log = 5 [(gogoproto.jsontag) ="log"];  //`json:"log,omitempty"`
+}
+
+message BulkNetOutRuleRequest{
+	repeated NetOutRuleRequest NetOutRules = 1;
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package vcontainermodels;
+
+enum Signal{
+    SignalTerminate = 0;
+    SignalKill = 1;
+}
+
+message SignalRequest{
+    Signal Signal = 1;
+}
+
+message WaitResponse{
+    bool Exited = 1;
+    int32 ExitCode = 2;
+}
