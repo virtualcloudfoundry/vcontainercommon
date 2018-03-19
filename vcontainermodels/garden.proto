@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package vcontainermodels;
+
+import "google/protobuf/duration.proto";
+import "common.proto";
+import "container.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message Capacity{
+    uint64 MemoryInBytes =1;
+    uint64 DiskInBytes =2;
+    uint64 MaxContainers = 3;
+}
+
+message ContainerSpec{
+    string Handle = 1;
+    google.protobuf.Duration GraceTime = 2;//
+
+	// Deprecated in favour of Image property
+    string RootFSPath  =3;//`json:"rootfs,omitempty"`
+    
+    ImageRef Image =4 [(gogoproto.nullable) = false];// `json:"image,omitempty"`
+    repeated BindMount BindMounts =5 [(gogoproto.nullable) = false];// `json:"bind_mounts,omitempty"`
+
+    string  Network = 6;// `json:"network,omitempty"`
+
+    // Properties is a sequence of string key/value pairs providing arbitrary
+    // data about the container. The keys are assumed to be unique but this is not
+    // enforced via the protocol.
+    Properties Properties = 7;//`json:"properties,omitempty"`
+
+	// TODO
+    repeated string	Env =8;//[] `json:"env,omitempty"`
+
+	// If Privileged is true the container does not have a user namespace and the root user in the container
+	// is the same as the root user in the host. Otherwise, the container has a user namespace and the root
+	// user in the container is mapped to a non-root user in the host. Defaults to false.
+    bool	Privileged =9;// `json:"privileged,omitempty"`
+
+	// Limits to be applied to the newly created container.
+    Limits Limits  =10 [(gogoproto.nullable) = false];//`json:"limits,omitempty"`
+    
+    repeated NetInRequest NetIn = 11 [(gogoproto.nullable) = false];
+
+    repeated NetOutRuleRequest NetOut = 12 [(gogoproto.nullable) = false];
+}
+
+
+message Limits  {
+    BandwidthLimits	Bandwidth =1 [(gogoproto.nullable) = false];// `json:"bandwidth_limits,omitempty"`
+	CPULimits CPU     =2 [(gogoproto.nullable) = false];//         `json:"cpu_limits,omitempty"`
+	DiskLimits Disk  =3 [(gogoproto.nullable) = false];//          `json:"disk_limits,omitempty"`
+	MemoryLimits Memory =4 [(gogoproto.nullable) = false];//       `json:"memory_limits,omitempty"`
+	PidLimits Pid   =5 [(gogoproto.nullable) = false];//           `json:"pid_limits,omitempty"`
+}
+
+
+message ContainerInfoEntry {
+	ContainerInfo Info = 1 [(gogoproto.nullable) = false];
+	Error Err = 2 [(gogoproto.nullable) = true];;
+	// Info ContainerInfo
+	// Err  *Error
+}
+
+// the client service messages
+message BulkInfoRequest{
+    repeated string Handles = 1;
+}
+
+message BulkInfoResponse{
+	map<string,ContainerInfoEntry> ContainerInfoEntry = 1;
+}
+
+message ContainerMetricsEntry {
+    Metrics Metrics  =  1[(gogoproto.nullable) = false];
+    Error err = 2 [(gogoproto.nullable) = true];
+}
+
+message BulkMetricsRequest {
+    repeated string Handles = 1;
+}
+
+message BulkMetricsResponse{
+    map<string,ContainerMetricsEntry> ContainerMetricsEntry = 1;
+}

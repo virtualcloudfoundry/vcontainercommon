@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package vcontainermodels;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message VContainerClientConfig{
+    bool UseVContainer = 1 [(gogoproto.jsontag) = "use_vcontainer,omitempty",(gogoproto.moretags) = "yaml:\"use_vcontainer,omitempty\""];
+    string VContainerAddress = 2 [(gogoproto.jsontag) = "vcontainer_address,omitempty",(gogoproto.moretags) = "yaml:\"vcontainer_address,omitempty\""];
+    string VContainerCACertFile = 3 [(gogoproto.jsontag) = "vcontainer_ca_cert_file,omitempty",(gogoproto.moretags) = "yaml:\"vcontainer_ca_cert_file,omitempty\""];
+    string VContainerClientCertFile = 4 [(gogoproto.jsontag) = "vcontainer_client_cert_file,omitempty",(gogoproto.moretags) = "yaml:\"vcontainer_client_cert_file,omitempty\""];
+    string VContainerClientKeyFile = 5 [(gogoproto.jsontag) = "vcontainer_client_key_file,omitempty",(gogoproto.moretags) = "yaml:\"vcontainer_client_key_file,omitempty\""];
+}
+
+message Error {
+     string Err = 1 ;
+}
+
+message KeyValueMessage{
+    string Key = 1;
+    string Value = 2;
+}
+
+message Properties{
+    map<string,string> Properties=1;
+}
+
+message ImageRef  {
+    string	URI    =1;//   `json:"uri,omitempty"`
+    string	Username =2;// `json:"username,omitempty"`
+	string Password =3;// `json:"password,omitempty"`
+}
+
+message BindMount{
+    // SrcPath contains the path of the directory to be mounted.
+    string SrcPath  = 1;
+
+    // DstPath contains the path of the mount point in the container. If the
+    // directory does not exist, it is created.
+    string DstPath  = 2;
+
+    // Mode must be either "RO" or "RW". Alternatively, mode may be omitted and defaults to RO.
+	// If mode is "RO", a read-only mount point is created.
+	// If mode is "RW", a read-write mount point is created.
+	BindMountMode Mode  = 3;// `json:"mode,omitempty"`
+
+	// BindMountOrigin must be either "Host" or "Container". Alternatively, origin may be omitted and
+	// defaults to "Host".
+	// If origin is "Host", src_path denotes a path in the host.
+	// If origin is "Container", src_path denotes a path in the container.
+	BindMountOrigin Origin = 4;// `json:"origin,omitempty"`
+}
+
+enum BindMountMode {
+    BindMountModeRO = 0;
+    BindMountModeRW = 1;
+}
+
+enum BindMountOrigin{
+    BindMountOriginHost = 0;
+    BindMountOriginContainer = 1;
+}

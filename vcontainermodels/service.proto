@@ -1,0 +1,91 @@
+syntax = "proto3";
+package vcontainermodels;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "common.proto";
+import "garden.proto";
+import "container.proto";
+import "process.proto";
+
+service VGarden {
+    rpc Ping(google.protobuf.Empty) returns(google.protobuf.Empty)  {}
+
+    rpc Capacity(google.protobuf.Empty) returns (vcontainermodels.Capacity) {}
+    
+    rpc Create(ContainerSpec) returns(google.protobuf.Empty)  {}
+
+    rpc Destroy(google.protobuf.StringValue) returns(google.protobuf.Empty)  {}
+
+    rpc Containers(vcontainermodels.Properties) returns (ContainersResponse){}
+    
+    rpc BulkInfo(BulkInfoRequest) returns (BulkInfoResponse) {}
+
+    rpc BulkMetrics(BulkMetricsRequest) returns (BulkMetricsResponse){}
+    // client always sends a big file to the server.
+    // rpc SendFile(stream BigFileChunk) returns (BigFileAck) {}
+    rpc Lookup(google.protobuf.StringValue) returns (google.protobuf.Empty){}
+}
+
+service VContainer{
+    // rpc Handle(google.protobuf.Empty) returns(string) {}
+    rpc Run(ProcessSpec) returns (RunResponse) {}
+
+    rpc Stop(StopMessage) returns (google.protobuf.Empty) {}
+
+    rpc Metrics(google.protobuf.Empty) returns(vcontainermodels.Metrics) {}
+    // Sets the grace time.
+	rpc SetGraceTime(google.protobuf.Duration) returns (google.protobuf.Empty) {}
+    // Properties returns the current set of properties
+    rpc Properties(google.protobuf.Empty) returns (vcontainermodels.Properties) {}
+    
+    rpc Info(google.protobuf.Empty) returns (vcontainermodels.ContainerInfo) {}
+
+    rpc NetIn(NetInRequest) returns (NetInResponse) {}
+
+    rpc NetOut(NetOutRuleRequest) returns (google.protobuf.Empty) {}
+    
+	rpc BulkNetOut(BulkNetOutRuleRequest) returns (google.protobuf.Empty) {}
+    // Property returns the value of the property with the specified name.
+    //
+    // Errors:
+    // * When the property does not exist on the container.
+    rpc Property(google.protobuf.StringValue) returns(google.protobuf.StringValue){}
+
+    // Set a named property on a container to a specified value.
+    //
+    // Errors:
+    // * None.
+    rpc SetProperty(vcontainermodels.KeyValueMessage) returns (google.protobuf.Empty) {}
+    rpc StreamIn(stream vcontainermodels.StreamInSpec) returns (vcontainermodels.StreamInResponse) {}
+    rpc StreamOut(vcontainermodels.StreamOutSpec) returns (stream vcontainermodels.StreamOutResponse) {}
+    // Remove a property with the specified name from a container.
+    //
+    // Errors:
+    // * None.
+    rpc RemoveProperty(google.protobuf.StringValue) returns (google.protobuf.Empty) {}
+
+    rpc CurrentMemoryLimit(google.protobuf.Empty) returns (MemoryLimits){}
+    rpc CurrentCPULimit(google.protobuf.Empty) returns (CPULimits){}
+}
+
+service VProcess{
+    rpc Signal(SignalRequest) returns(google.protobuf.Empty){}
+    rpc Wait(google.protobuf.Empty) returns (stream WaitResponse){}
+    rpc SetTTY (TTYSpec) returns (google.protobuf.Empty){}
+}
+
+message ContainersResponse{
+    // TODO only a place holder.
+    repeated string Handle = 1;
+}
+
+// the container service messages
+message StopRequest{
+    bool Kill = 1;
+}
+
+message StopResponse{
+    
+}
